@@ -13,11 +13,14 @@ import concurrent.futures
 import asyncio
 
 async def bgtask(app):
+  def dbrun(func, *args, **kwargs):
+    return asyncio.get_event_loop().run_in_executor(app['dbexec'], lambda: func(*args, **kwargs))
   while True:
     if not app['bot_responded']:
       try:
         resp = await app['nn'].get('default')
         logging.info('sending response: %s', resp)
+        await dbrun(app['db'].log_message, 0, resp)
         for ws in app['websockets'].values():
           await ws.send_json({'action': 'sent', 'name': app['botname'], 'text': resp})
         app['bot_responded'] = True
