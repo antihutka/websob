@@ -167,11 +167,13 @@
       <span id="status">disconnected</span>
     </div>
     <div id="log"
-         style="width:40em;height:35em;overflow:auto;border:1px solid black">
+         style="width:100%;height:35em;overflow:auto;border:1px solid black">
     </div>
     <form id="chatform" onsubmit="return false;">
-      <input id="text" type="text" />
-      <input id="send" type="button" value="Send" disabled/>
+        <input style="float: right" id="send" type="button" value="Send" disabled/>
+        <div style="overflow: hidden; padding-right: .5em;">
+          <input style="width: 100%" id="text" type="text" />
+        </div>
     </form>
   </body>
 </html>
