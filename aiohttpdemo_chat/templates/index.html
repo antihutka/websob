@@ -16,24 +16,63 @@
       }
       .joinmsg {
         font-style: italic;
+        color: grey;
+      }
+      .memsg {
+        font-style: italic;
+      }
+      .sentmsg {
+        color: yellow;
+      }
+      .username {
+        color: rgb(97, 177, 146);
       }
     </style>
     <script language="javascript" type="text/javascript">
      $(function() {
        var conn = null;
        var name = "UNKNOWN";
-       function log(msg, cls) {
+       function log(msg, cls, username) {
          var control = $('#log');
          var date = new Date();
-         var date_prompt = '(' + date.toISOString().split('T')[1].slice(0,8) + ') ';
-         logline = $('<div/>')
-         dat = $('<span/>')
+         var date_prompt = '[' + date.toISOString().split('T')[1].slice(0,8) + '] ';
+         var isme = false;
+         if (msg.startsWith('/me')) {
+           isme = true
+           msg = msg.slice(3)
+         }
+         
+         var logline = $('<div/>')
+         
+         var dat = $('<span/>')
          dat.text(date_prompt)
          logline.append(dat)
-         txt = $('<span/>')
-         txt.addClass(cls)
+         
+         var usertag
+         if (username) {
+           usertag = $('<span/>')
+           usertag.text(username)
+           usertag.addClass('username')
+           usertag.addClass(cls)
+           if (cls != 'connmsg') {
+             if (!isme)
+               usertag.text(usertag.text() + ': ')
+             else 
+               usertag.addClass('memsg')
+             logline.append(usertag)
+           }
+         }
+         
+         var txt = $('<span/>')
          txt.text(msg)
+         txt.addClass(cls)
+         if (isme)
+           txt.addClass('memsg')
          logline.append(txt)
+         
+         if (username && cls == 'connmsg')
+           logline.append(usertag)
+         
          control.append(logline)
          control.scrollTop(control.scrollTop() + 1000);
        }
@@ -51,24 +90,24 @@
            switch (data.action) {
              case  'connect':
                name = data.name;
-               log('Connected as ' + name, 'connmsg');
+               log('Connected as ', 'connmsg', name);
                update_ui();
                break;
              case  'disconnect':
                name = data.name;
-               log('Disconnected ' + name, 'connmsg');
+               log('Disconnected.', 'connmsg', null);
                update_ui();
                break;
              case 'join':
-               log('Joined ' + data.name, 'joinmsg');
+               log('joined the chat', 'joinmsg', data.name);
                break;
              case 'sent':
-               log(data.name + ': ' + data.text);
+               log(data.text, 'recvmsg', data.name);
                break;
            }
          };
          conn.onclose = function() {
-           log('Disconnected.');
+           log('Disconnected.', 'connmsg', null);
            conn = null;
            update_ui();
          };
@@ -106,13 +145,13 @@
        $('#send').on('click', function() {
          var text = $('#text').val();
          // log('Sending: ' + text);
-         log(text);
+         log(text, 'sentmsg', name);
          conn.send(text);
          $('#text').val('').focus();
          return false;
        });
        $('#text').on('keyup', function(e) {
-         if (e.keyCode === 13) {
+         if (e.keyCode === 13 && conn != null) {
            $('#send').click();
            return false;
          }
