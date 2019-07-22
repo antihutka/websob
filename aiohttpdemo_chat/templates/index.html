@@ -4,15 +4,37 @@
   <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js">
     </script>
+    <style>
+      body {
+        background-color: rgb(64,64,64);
+        color: white;
+        font-family: Sans-Serif;
+      }
+      .connmsg {
+        font-weight: bold;
+        color: grey;
+      }
+      .joinmsg {
+        font-style: italic;
+      }
+    </style>
     <script language="javascript" type="text/javascript">
      $(function() {
        var conn = null;
        var name = "UNKNOWN";
-       function log(msg) {
+       function log(msg, cls) {
          var control = $('#log');
          var date = new Date();
          var date_prompt = '(' + date.toISOString().split('T')[1].slice(0,8) + ') ';
-         control.html(control.html() + date_prompt + msg + '<br/>');
+         logline = $('<div/>')
+         dat = $('<span/>')
+         dat.text(date_prompt)
+         logline.append(dat)
+         txt = $('<span/>')
+         txt.addClass(cls)
+         txt.text(msg)
+         logline.append(txt)
+         control.append(logline)
          control.scrollTop(control.scrollTop() + 1000);
        }
        function connect() {
@@ -29,16 +51,16 @@
            switch (data.action) {
              case  'connect':
                name = data.name;
-               log('Connected as ' + name);
+               log('Connected as ' + name, 'connmsg');
                update_ui();
                break;
              case  'disconnect':
                name = data.name;
-               log('Disconnected ' + name);
+               log('Disconnected ' + name, 'connmsg');
                update_ui();
                break;
              case 'join':
-               log('Joined ' + data.name);
+               log('Joined ' + data.name, 'joinmsg');
                break;
              case 'sent':
                log(data.name + ': ' + data.text);
