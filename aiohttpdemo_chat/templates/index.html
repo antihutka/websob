@@ -2,9 +2,17 @@
 <meta charset="utf-8" />
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js">
     </script>
     <style>
+      html, body {
+        height: 100%;
+      }
+      body {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
       body {
         background-color: rgb(64,64,64);
         color: white;
@@ -159,17 +167,16 @@
      });
     </script>
   </head>
-  <body>
+  <body style="display:flex; flex-direction:column;">
     <h3>Chat!</h3>
     <div>
       <button id="connect">Connect</button>&nbsp;|&nbsp;Status:
       <span id="name">UNKNOWN</span>
       <span id="status">disconnected</span>
     </div>
-    <div id="log"
-         style="width:100%;height:35em;overflow:auto;border:1px solid black">
+    <div id="log" style="flex: 1 0 10em; overflow: auto; border:1px solid black"">
     </div>
-    <form id="chatform" onsubmit="return false;">
+    <form style="margin-bottom: 5px" id="chatform" onsubmit="return false;">
         <input style="float: right" id="send" type="button" value="Send" disabled/>
         <div style="overflow: hidden; padding-right: .5em;">
           <input style="width: 100%" id="text" type="text" />
