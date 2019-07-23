@@ -23,7 +23,6 @@ def get_true_remote(request):
     return request.remote
 
 async def index(request):
-    #print(request.__dict__)
     ws_current = web.WebSocketResponse()
     ws_ready = ws_current.can_prepare(request)
     if not ws_ready.ok:
@@ -50,11 +49,17 @@ async def index(request):
         await ws.send_json({'action': 'join', 'name': name, 'num_users': len(request.app['websockets'])+1})
     request.app['websockets'][name] = ws_current
 
-    while True:
-        msg = await ws_current.receive()
+    is_timeout = False;
+
+    try:
+      while True:
+        msg = await ws_current.receive(timeout = 90)
+        #log.info('got msg: %s', msg)
 
         if msg.type == aiohttp.WSMsgType.text:
-            jmsg = loads(msg.data)
+          jmsg = loads(msg.data)
+          action = jmsg['action']
+          if action == 'send':
             msgid = jmsg['msgid']
             msgtext = jmsg['text']
             log.info('Message %d from %s: %s', msgid, name, msgtext)
@@ -66,12 +71,18 @@ async def index(request):
                         {'action': 'sent', 'name': name, 'text': msgtext, 'is_bot': False})
             await ws_current.send_json({'action': 'send_confirm', 'id': msgid})
             request.app['bot_responded'] = False
+          elif action == 'ping':
+            pass
+          else:
+            log.info('Unknown action %s', action)
         else:
             break
-
-    del request.app['websockets'][name]
-    log.info('%s disconnected.', name)
-    for ws in request.app['websockets'].values():
-        await ws.send_json({'action': 'disconnect', 'name': name, 'num_users': len(request.app['websockets'])})
-
+    except asyncio.TimeoutError:
+      log.info('User timed out: %s', name)
+      is_timeout = True
+    finally:
+      del request.app['websockets'][name]
+      log.info('%s disconnected.', name)
+      for ws in request.app['websockets'].values():
+        await ws.send_json({'action': 'disconnect', 'name': name, 'num_users': len(request.app['websockets']), 'is_timeout': is_timeout})
     return ws_current

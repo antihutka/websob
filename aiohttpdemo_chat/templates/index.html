@@ -126,7 +126,7 @@
                break;
              case  'disconnect':
                name = data.name;
-               log('left the chat', 'joinmsg', name);
+               log(data.is_timeout ? 'timed out' : 'left the chat', 'joinmsg', name);
                online_users = data.num_users;
                update_ui();
                break;
@@ -173,6 +173,13 @@
          }
          $('#name').text(name);
        }
+       function send_ping() {
+         if (conn != null) {
+           conn.send(JSON.stringify({'action': 'ping'}));
+         }
+         setTimeout(send_ping, 30000);
+       }
+       send_ping()
        $('#connect').on('click', function() {
          if (conn == null) {
            connect();
@@ -186,7 +193,7 @@
          var text = $('#text').val();
          // log('Sending: ' + text);
          log(text, 'sentmsg', name, msgid);
-         conn.send(JSON.stringify({text, msgid}));
+         conn.send(JSON.stringify({'action': 'send', text, msgid}));
          msgid++;
          $('#text').val('').focus();
          return false;
