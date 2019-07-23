@@ -22,7 +22,7 @@ async def bgtask(app):
         logging.info('sending response: %s', resp)
         await dbrun(app['db'].log_message, 0, resp)
         for ws in app['websockets'].values():
-          await ws.send_json({'action': 'sent', 'name': app['botname'], 'text': resp})
+          await ws.send_json({'action': 'sent', 'name': app['botname'], 'text': resp, 'is_bot': True})
         app['bot_responded'] = True
       except:
         logging.exception('Error sending response')

@@ -43,7 +43,7 @@ async def index(request):
             for ws in request.app['websockets'].values():
                 if ws is not ws_current:
                     await ws.send_json(
-                        {'action': 'sent', 'name': name, 'text': msg.data})
+                        {'action': 'sent', 'name': name, 'text': msg.data, 'is_bot': False})
             request.app['bot_responded'] = False
         else:
             break

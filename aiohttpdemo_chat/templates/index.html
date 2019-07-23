@@ -18,6 +18,9 @@
         color: white;
         font-family: Sans-Serif;
       }
+      a {
+        color: rgb(97, 177, 146);
+      }
       .connmsg {
         font-weight: bold;
         color: grey;
@@ -31,6 +34,9 @@
       }
       .sentmsg {
         color: yellow;
+      }
+      .botmsg {
+        color: lightblue;
       }
       .username {
         color: rgb(97, 177, 146);
@@ -110,7 +116,7 @@
                log('joined the chat', 'joinmsg', data.name);
                break;
              case 'sent':
-               log(data.text, 'recvmsg', data.name);
+               log(data.text, data.is_bot ? 'botmsg' : 'recvmsg', data.name);
                break;
            }
          };
@@ -168,11 +174,19 @@
     </script>
   </head>
   <body style="display:flex; flex-direction:column;">
-    <h3>Chat!</h3>
+    <h3>Talk to Sobert!</h3>
     <div>
       <button id="connect">Connect</button>&nbsp;|&nbsp;Status:
       <span id="name">UNKNOWN</span>
       <span id="status">disconnected</span>
+      <div style="float: right">
+        Talk to me on:
+        <a href="https://t.me/SobertBot">Telegram</a>
+        <a href="https://discordapp.com/oauth2/authorize?client_id=477996444775743488&scope=bot">Discord</a>
+        <a href="https://my.secondlife.com/SobertStarsting">Second Life</a>
+        Source:
+        <a href="https://github.com/antihutka/">Github</a>
+      </div>
     </div>
     <div id="log" style="flex: 1 0 10em; overflow: auto; border:1px solid black"">
     </div>
