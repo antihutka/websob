@@ -44,20 +44,20 @@ async def index(request):
 
     await dbrun(db.log_login, nameid, rmt)
 
-    await ws_current.send_json({'action': 'connect', 'name': name})
+    await ws_current.send_json({'action': 'connect', 'name': name, 'num_users': len(request.app['websockets'])+1})
 
     for ws in request.app['websockets'].values():
-        await ws.send_json({'action': 'join', 'name': name})
+        await ws.send_json({'action': 'join', 'name': name, 'num_users': len(request.app['websockets'])+1})
     request.app['websockets'][name] = ws_current
 
     while True:
         msg = await ws_current.receive()
-        jmsg = loads(msg.data)
-        msgid = jmsg['msgid']
-        msgtext = jmsg['text']
-        log.info('Message %d from %s: %s', msgid, name, msgtext)
 
         if msg.type == aiohttp.WSMsgType.text:
+            jmsg = loads(msg.data)
+            msgid = jmsg['msgid']
+            msgtext = jmsg['text']
+            log.info('Message %d from %s: %s', msgid, name, msgtext)
             await dbrun(db.log_message, nameid, msgtext)
             await nn.put('default', msgtext)
             for ws in request.app['websockets'].values():
@@ -72,6 +72,6 @@ async def index(request):
     del request.app['websockets'][name]
     log.info('%s disconnected.', name)
     for ws in request.app['websockets'].values():
-        await ws.send_json({'action': 'disconnect', 'name': name})
+        await ws.send_json({'action': 'disconnect', 'name': name, 'num_users': len(request.app['websockets'])})
 
     return ws_current

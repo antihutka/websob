@@ -52,6 +52,8 @@
        var name = "UNKNOWN";
        var msgid = 0;
        var sendings = {}
+       var online_users;
+       
        function log(msg, cls, username, msgid) {
          var control = $('#log');
          var date = new Date();
@@ -119,15 +121,19 @@
              case  'connect':
                name = data.name;
                log('Connected as ', 'connmsg', name);
+               online_users = data.num_users;
                update_ui();
                break;
              case  'disconnect':
                name = data.name;
-               log('Disconnected.', 'connmsg', null);
+               log('left the chat', 'joinmsg', name);
+               online_users = data.num_users;
                update_ui();
                break;
              case 'join':
                log('joined the chat', 'joinmsg', data.name);
+               online_users = data.num_users;
+               update_ui();
                break;
              case 'sent':
                log(data.text, data.is_bot ? 'botmsg' : 'recvmsg', data.name);
@@ -158,10 +164,12 @@
            $('#status').text('disconnected');
            $('#connect').html('Connect');
            $('#send').prop("disabled", true);
+           $('#online_users').text('');
          } else {
            $('#status').text('connected (' + conn.protocol + ')');
            $('#connect').html('Disconnect');
            $('#send').prop("disabled", false);
+           $('#online_users').text(online_users);
          }
          $('#name').text(name);
        }
@@ -198,6 +206,7 @@
       <button id="connect">Connect</button>&nbsp;|&nbsp;Status:
       <span id="name">UNKNOWN</span>
       <span id="status">disconnected</span>
+      Online users: <span id="online_users"/>
       <div style="float: right">
         Talk to me on:
         <a href="https://t.me/SobertBot">Telegram</a>
