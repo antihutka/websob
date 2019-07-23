@@ -4,6 +4,7 @@ import aiohttp
 import aiohttp_jinja2
 from aiohttp import web
 import asyncio
+from json import loads
 
 log = logging.getLogger(__name__)
 
@@ -51,15 +52,19 @@ async def index(request):
 
     while True:
         msg = await ws_current.receive()
-        log.info('Message from %s: %s', name, msg.data)
+        jmsg = loads(msg.data)
+        msgid = jmsg['msgid']
+        msgtext = jmsg['text']
+        log.info('Message %d from %s: %s', msgid, name, msgtext)
 
         if msg.type == aiohttp.WSMsgType.text:
-            await dbrun(db.log_message, nameid, msg.data)
-            await nn.put('default', msg.data)
+            await dbrun(db.log_message, nameid, msgtext)
+            await nn.put('default', msgtext)
             for ws in request.app['websockets'].values():
                 if ws is not ws_current:
                     await ws.send_json(
-                        {'action': 'sent', 'name': name, 'text': msg.data, 'is_bot': False})
+                        {'action': 'sent', 'name': name, 'text': msgtext, 'is_bot': False})
+            await ws_current.send_json({'action': 'send_confirm', 'id': msgid})
             request.app['bot_responded'] = False
         else:
             break

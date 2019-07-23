@@ -41,12 +41,18 @@
       .username {
         color: rgb(97, 177, 146);
       }
+      .sending {
+        color: grey;
+        margin-left: 0.5em;
+      }
     </style>
     <script language="javascript" type="text/javascript">
      $(function() {
        var conn = null;
        var name = "UNKNOWN";
-       function log(msg, cls, username) {
+       var msgid = 0;
+       var sendings = {}
+       function log(msg, cls, username, msgid) {
          var control = $('#log');
          var date = new Date();
          var date_prompt = '[' + date.toISOString().split('T')[1].slice(0,8) + '] ';
@@ -87,6 +93,14 @@
          if (username && cls == 'connmsg')
            logline.append(usertag)
          
+         if (typeof msgid === "number") {
+           var sending = $('<span/>');
+           sending.addClass('sending');
+           sending.text('(sending)');
+           logline.append(sending);
+           sendings[msgid] = sending;
+         }
+         
          control.append(logline)
          control.scrollTop(control.scrollTop() + 1000);
        }
@@ -118,6 +132,10 @@
              case 'sent':
                log(data.text, data.is_bot ? 'botmsg' : 'recvmsg', data.name);
                break;
+             case 'send_confirm':
+               elm = sendings[data.id];
+               //elm.parentNode.removeChild(elm);
+               elm.remove();
            }
          };
          conn.onclose = function() {
@@ -159,8 +177,9 @@
        $('#send').on('click', function() {
          var text = $('#text').val();
          // log('Sending: ' + text);
-         log(text, 'sentmsg', name);
-         conn.send(text);
+         log(text, 'sentmsg', name, msgid);
+         conn.send(JSON.stringify({text, msgid}));
+         msgid++;
          $('#text').val('').focus();
          return false;
        });
