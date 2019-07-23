@@ -24,8 +24,10 @@ class WebsobDB:
 
   @with_cursor
   def get_name(cur, self):
-    cur.execute("SELECT username_id, username FROM usernames WHERE lastused IS NULL ORDER BY RAND() LIMIT 1")
-    return cur.fetchone()
+    cur.execute("SELECT username_id, username FROM usernames WHERE lastused IS NULL ORDER BY RAND() LIMIT 1 FOR UPDATE")
+    uid, unm = cur.fetchone()
+    cur.execute("UPDATE usernames SET lastused=CURRENT_TIMESTAMP() WHERE username_id=%s", (uid,))
+    return uid,unm
 
   @with_cursor
   def log_message(cur, self, userid, msgtext):
