@@ -3,6 +3,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sobert web interface</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js">
     </script>
     <style>
@@ -43,6 +44,9 @@
       }
       .sending {
         color: grey;
+        margin-left: 0.5em;
+      }
+      .status {
         margin-left: 0.5em;
       }
     </style>
@@ -163,7 +167,7 @@
            $('#status').text('disconnected');
            $('#connect').html('Connect');
            $('#send').prop("disabled", true);
-           $('#online_users').text('');
+           $('#online_users').text('-');
          } else {
            $('#status').text('connected (' + conn.protocol + ')');
            $('#connect').html('Disconnect');
@@ -209,10 +213,10 @@
   <body style="display:flex; flex-direction:column;">
     <h3>Talk to Sobert!</h3>
     <div>
-      <button id="connect">Connect</button>&nbsp;|&nbsp;Status:
-      <span id="name">UNKNOWN</span>
-      <span id="status">disconnected</span>
-      Online users: <span id="online_users">?</span>
+      <button id="connect">Connect</button>
+      <span class="status">Name: <span id="name" class="username">-</span></span>
+      <span class="status">Status: <span id="status">disconnected</span></span>
+      <span class="status">Online users: <span id="online_users">-</span></span>
       <div style="float: right">
         Talk to me on:
         <a href="https://t.me/SobertBot">Telegram</a>
